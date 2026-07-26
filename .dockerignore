@@ -1,0 +1,14 @@
+# .dockerignore
+# WHY: Keeps the Docker build fast and the image small by excluding files
+#      that the container does not need (local env files, caches, git history).
+.env
+.venv
+venv/
+__pycache__/
+*.pyc
+.git
+.gitignore
+uploads/*
+reports/*
+!uploads/.gitkeep
+!reports/.gitkeep

@@ -1,0 +1,40 @@
+# requirements.txt
+# -----------------
+# WHY: This file lists every Python package the app needs, so anyone can
+#      recreate the exact same environment with "pip install -r requirements.txt".
+# WHAT: Streamlit (UI), LangGraph + LangChain (agent orchestration),
+#       Google Gemini SDK (the LLM), Pandas/Matplotlib/Plotly (data + charts),
+#       FAISS (vector search for RAG), python-dotenv (reads the .env file).
+
+# --- Web UI ---
+streamlit>=1.40.2
+
+# --- Agentic AI / LLM orchestration ---
+# These are pinned exactly (rather than "minimum version") because the code
+# in agents/ and graph/ was written and tested against these specific APIs.
+langgraph==1.2.9
+langchain==1.3.14
+langchain-core==1.5.1
+langchain-community==0.4.2
+langchain-google-genai==4.3.1
+
+# --- Data handling ---
+# Minimum versions only (no upper pin) - this lets pip pick whichever
+# version already has a pre-built "wheel" for YOUR Python version, instead
+# of trying to compile an old version from source (which can fail on very
+# new Python releases). Tested with Python 3.12 and 3.14.
+pandas>=2.2.3
+numpy>=2.1.3
+
+# --- Charts ---
+matplotlib>=3.10.0
+plotly>=5.24.1
+
+# --- RAG / vector search ---
+faiss-cpu>=1.9.0.post1
+
+# --- Report export ---
+fpdf2>=2.8.2
+
+# --- Environment variables ---
+python-dotenv>=1.0.1

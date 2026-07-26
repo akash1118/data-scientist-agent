@@ -1,0 +1,21 @@
+# docker-compose.yml
+# -------------------
+# WHY: docker-compose lets us start the whole app with one command
+#      ("docker compose up") instead of typing a long "docker run" command.
+# WHAT: Defines a single service ("ai-data-analyst") built from our Dockerfile.
+# HOW: Reads secrets like GOOGLE_API_KEY from your local .env file automatically.
+
+services:
+  ai-data-analyst:
+    build: .
+    container_name: ai_data_analyst_app
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      # Mount these folders so uploaded files and generated reports survive
+      # a container restart, and so you can inspect them from your host machine.
+      - ./uploads:/app/uploads
+      - ./reports:/app/reports
+    restart: unless-stopped
