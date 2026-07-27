@@ -18,6 +18,23 @@ langchain-core==1.5.1
 langchain-community==0.4.2
 langchain-google-genai==4.3.1
 
+# Groq is wired in as an automatic FALLBACK chat provider (used only if
+# Gemini fails and GROQ_API_KEY is set in .env) - see utils/llm.py get_llm().
+langchain-groq==1.1.3
+
+# --- RAG embeddings (local, open-source, no API key needed) ---
+# HuggingFaceEmbeddings runs a small "sentence-transformers" model directly
+# on your machine (CPU) instead of calling a paid embedding API. This also
+# pulls in `sentence-transformers` and `torch` (CPU build), so the first
+# `pip install` here will take longer and download a few hundred MB.
+langchain-huggingface>=0.1.2
+sentence-transformers>=3.0.0
+# torchvision isn't actually used (we only embed text, never images), but a
+# newer `transformers` version eagerly imports an image-processing submodule
+# that requires torchvision just to be importable - without it, loading the
+# embedding model crashes with "ModuleNotFoundError: No module named 'torchvision'".
+torchvision>=0.19.0
+
 # --- Data handling ---
 # Minimum versions only (no upper pin) - this lets pip pick whichever
 # version already has a pre-built "wheel" for YOUR Python version, instead

@@ -103,7 +103,7 @@ AI_Data_Analyst/
 │   └── vector_store.py      # FAISS build + retrieve functions
 │
 ├── utils/
-│   ├── llm.py                # Builds the Gemini chat + embedding models
+│   ├── llm.py                # Builds the chat model (Gemini + Groq fallback) + local embeddings
 │   └── helpers.py            # Timestamps, timers, folder helpers
 │
 ├── scripts/
@@ -155,7 +155,28 @@ Then open `.env` and paste your key:
 GOOGLE_API_KEY=your_real_key_here
 ```
 
-### 5. (Optional) Regenerate the sample datasets
+### 5. (Optional) Add Groq as an automatic fallback
+
+Gemini is the **primary** chat provider, but you can wire in **Groq** (fast,
+cheap, open-source models) as an automatic **fallback**: if a call to Gemini
+fails for any reason (rate limit, quota exceeded, network error, bad key...),
+LangChain automatically retries the SAME request against Groq instead of
+crashing the app. Get a free key at **https://console.groq.com/keys**, then
+in your `.env`:
+
+```
+GROQ_API_KEY=your_real_groq_key_here
+GROQ_MODEL=llama-3.1-8b-instant
+```
+
+Leave `GROQ_API_KEY` blank (or as the placeholder) to disable this - the app
+will just use Gemini alone. See `utils/llm.py -> get_llm()`, which uses
+LangChain's `.with_fallbacks([...])` to wire this up in a few lines.
+
+Embeddings (used by the RAG page) don't need either key - see the next
+section.
+
+### 6. (Optional) Regenerate the sample datasets
 
 Two datasets are already included in `data/`, but you can regenerate them
 any time:
@@ -164,7 +185,7 @@ any time:
 python scripts/generate_sample_data.py
 ```
 
-### 6. Run the app
+### 7. Run the app
 
 ```bash
 streamlit run app.py
@@ -244,13 +265,17 @@ Step by step (see `agents/rag_agent.py`):
 2. **Chunking** (`tools/rag_tools.chunk_documents`) — rows are grouped into
    small chunks so the LLM gets a bit more context per lookup.
 3. **Embeddings + FAISS** (`rag/vector_store.build_vector_store`) — every
-   chunk is converted into a number vector (embedding) using Gemini's
-   embedding model, and stored in a FAISS index for fast similarity search.
+   chunk is converted into a number vector (embedding) using a small,
+   **local, open-source** model (`sentence-transformers/all-MiniLM-L6-v2`,
+   see `utils/llm.py -> get_embedding_model()`), and stored in a FAISS index
+   for fast similarity search. This step needs **no API key at all** - it
+   runs entirely on your own machine.
 4. **Retrieval** (`rag/vector_store.retrieve_relevant_chunks`) — the user's
    question is embedded the same way, and FAISS returns the top-k most
    similar chunks.
-5. **Answering** — those chunks are stuffed into a prompt, and Gemini answers
-   using _only_ that context.
+5. **Answering** — those chunks are stuffed into a prompt, and the chat LLM
+   (Gemini, or Groq if Gemini failed - see below) answers using _only_ that
+   context.
 
 Try asking:
 
@@ -311,8 +336,9 @@ _(Add your own screenshots here after running the app — placeholders below.)_
 ## 🧰 Tech Stack
 
 Python 3.12 · Streamlit · LangGraph · LangChain · Google Gemini
-(`gemini-2.5-flash` by default, configurable) · Pandas · Matplotlib · Plotly ·
-FAISS · Docker · python-dotenv
+(`gemini-2.5-flash` by default, configurable) · Groq (optional fallback,
+`llama-3.1-8b-instant`) · Sentence-Transformers (local embeddings,
+`all-MiniLM-L6-v2`) · Pandas · Matplotlib · Plotly · FAISS · Docker · python-dotenv
 
 ## ⚠️ Notes on Cost & API Limits
 
