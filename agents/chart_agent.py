@@ -13,6 +13,7 @@ import json
 from graph.state import AgentState
 from tools.chart_tools import create_chart, SUPPORTED_CHART_TYPES
 from utils.llm import get_llm
+from llmops.token_manager import extract_token_usage
 
 
 CHART_RECOMMENDATION_PROMPT_TEMPLATE = """
@@ -66,6 +67,9 @@ def run_chart_agent(state: AgentState) -> AgentState:
         )
         llm = get_llm()
         response = llm.invoke(prompt)
+
+        # LLMOps: record how many tokens this call used (see llmops/token_manager.py).
+        state["token_usage"] = extract_token_usage(response)
 
         # The LLM should return JSON text. We parse it carefully, and fall
         # back to a safe default chart if anything goes wrong (e.g. the LLM

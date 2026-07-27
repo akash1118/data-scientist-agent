@@ -223,3 +223,7 @@ reports/*.pdf
 uploads/*.csv
 !reports/.gitkeep
 !uploads/.gitkeep
+
+# LLMOps demo artifacts (see llmops/caching.py, llmops/monitoring.py)
+reports/llm_cache.sqlite
+reports/monitoring_log.csv

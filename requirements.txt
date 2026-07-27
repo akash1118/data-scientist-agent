@@ -53,5 +53,12 @@ faiss-cpu>=1.9.0.post1
 # --- Report export ---
 fpdf2>=2.8.2
 
+# --- LLMOps demo: API Development + Model Serving (see llmops/api_server.py) ---
+# A small FastAPI app + its server, plus `requests` to call it live from the
+# Streamlit "LLMOps & Production" page.
+fastapi>=0.115.0
+uvicorn>=0.30.0
+requests>=2.31.0
+
 # --- Environment variables ---
 python-dotenv>=1.0.1

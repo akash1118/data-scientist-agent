@@ -13,6 +13,7 @@ from graph.state import AgentState
 from tools.rag_tools import dataframe_to_documents, chunk_documents, build_dataset_summary_document
 from rag.vector_store import build_vector_store, retrieve_relevant_chunks
 from utils.llm import get_llm
+from llmops.token_manager import extract_token_usage
 
 
 RAG_ANSWER_PROMPT_TEMPLATE = """
@@ -74,6 +75,9 @@ def run_rag_agent(state: AgentState) -> AgentState:
     llm = get_llm()
     response = llm.invoke(prompt)
     state["rag_answer"] = response.content
+
+    # LLMOps: record how many tokens this call used (see llmops/token_manager.py).
+    state["token_usage"] = extract_token_usage(response)
 
     # Log this step for the execution trace.
     messages = state.get("messages", [])

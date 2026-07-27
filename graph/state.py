@@ -55,3 +55,6 @@ class AgentState(TypedDict, total=False):
 
     # --- Bonus: execution trace for the UI ("which agent ran, how long") ---
     agent_trace: List[Dict[str, Any]]
+
+    # --- LLMOps: token usage from the most recent LLM call (see llmops/token_manager.py) ---
+    token_usage: Dict[str, int]

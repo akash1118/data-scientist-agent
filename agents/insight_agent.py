@@ -11,6 +11,7 @@
 
 from graph.state import AgentState
 from utils.llm import get_llm
+from llmops.token_manager import extract_token_usage
 
 
 # A single, clear prompt template. Keeping it as a plain f-string (instead of
@@ -69,6 +70,9 @@ def run_insight_agent(state: AgentState) -> AgentState:
 
     # ChatGoogleGenerativeAI responses have a `.content` attribute with the text.
     state["ai_insights"] = response.content
+
+    # LLMOps: record how many tokens this call used (see llmops/token_manager.py).
+    state["token_usage"] = extract_token_usage(response)
 
     # Log this step for the execution trace.
     messages = state.get("messages", [])

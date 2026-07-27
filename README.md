@@ -23,6 +23,7 @@ by reading real, working, heavily-commented code.
 | 💬 Ask your Dataset    | A full **RAG** pipeline: DataFrame → text → embeddings → FAISS → retrieval → LLM answer |
 | 📈 Visualization       | The **Chart Agent** picks the best chart type + axes and explains why                   |
 | 📝 Generate Report     | Runs the **entire LangGraph workflow** end-to-end and exports Markdown/PDF              |
+| 🏭 LLMOps & Production | Hands-on demos of Model Serving, an API, Token Management, Caching, Monitoring, Evaluation, Guardrails, and Cost Optimization |
 
 ---
 
@@ -77,7 +78,7 @@ calling) without overwhelming a beginner.
 
 ```
 AI_Data_Analyst/
-├── app.py                  # The ENTIRE Streamlit UI (all 7 pages, sidebar nav)
+├── app.py                  # The ENTIRE Streamlit UI (all 8 pages, sidebar nav)
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
@@ -101,6 +102,16 @@ AI_Data_Analyst/
 │
 ├── rag/
 │   └── vector_store.py      # FAISS build + retrieve functions
+│
+├── llmops/                  # Beginner-friendly production/LLMOps concepts (see below)
+│   ├── model_serving.py     # Wraps agents as reusable "service" functions
+│   ├── api_server.py        # Minimal FastAPI app exposing those functions over HTTP
+│   ├── token_manager.py     # Reads token usage off every LLM response
+│   ├── caching.py           # Turns on LangChain's SQLite-backed LLM cache
+│   ├── monitoring.py        # Logs every agent run (latency, success/failure)
+│   ├── evaluation.py        # Groundedness check + LLM-as-judge scoring
+│   ├── guardrails.py        # Input/output validation checks
+│   └── cost_optimizer.py    # Token -> estimated $ cost, plus savings tips
 │
 ├── utils/
 │   ├── llm.py                # Builds the chat model (Gemini + Groq fallback) + local embeddings
@@ -286,6 +297,31 @@ Try asking:
 
 ---
 
+## 🏭 LLMOps & Production Concepts
+
+Building a working demo is step one - running it for real users takes more
+engineering. The **🏭 LLMOps & Production** page is a hands-on tour of eight
+concepts that turn a demo into something production-worthy, each in its own
+small file under `llmops/` and each with a live, interactive demo in the UI.
+
+| Concept                | File                        | What the demo does                                                                          |
+| ----------------------- | --------------------------- | --------------------------------------------------------------------------------------------- |
+| **Model Serving**       | `llmops/model_serving.py`   | Wraps the Profiler/Insight/RAG agents as plain, reusable functions - no Streamlit, no LangGraph state, just data in → data out. |
+| **API Development**     | `llmops/api_server.py`      | A minimal FastAPI app (`/health`, `/datasets`, `/profile`, `/insights`, `/ask`) built on the same serving functions. The demo tab launches it in a **background thread inside the Streamlit process itself**, then calls it live over real HTTP. |
+| **Token Management**    | `llmops/token_manager.py`   | Every agent call automatically records `input_tokens` / `output_tokens` / `total_tokens`, read straight off LangChain's `response.usage_metadata`. |
+| **Caching**             | `llmops/caching.py`         | Turns on LangChain's global LLM cache (`set_llm_cache`), backed by a local SQLite file. The demo runs the same prompt twice so you can see the ~1000x+ speedup on the second (cached) call. |
+| **Monitoring**          | `llmops/monitoring.py`      | Logs every agent run's latency and success/failure, both in-memory (for a live dashboard) and to `reports/monitoring_log.csv` (so it survives restarts). |
+| **Evaluation**          | `llmops/evaluation.py`      | Two techniques: a free/instant **groundedness** check (does the answer's wording overlap with the retrieved context?) and an **LLM-as-judge** (a second LLM call grades the first one's answer 1-5). |
+| **Guardrails**          | `llmops/guardrails.py`      | Input checks (empty, too long, looks like prompt injection) run **before** the LLM call; output checks (empty, looks like it contains sensitive data) run **after**. These same checks are wired into the real "Ask your Dataset" page, not just the demo tab. |
+| **Cost Optimization**   | `llmops/cost_optimizer.py`  | Converts each call's token counts into an estimated USD cost using an illustrative per-model pricing table, plus a static list of concrete cost-saving tips. |
+
+Everything on this page is **beginner-friendly by design**: no external
+monitoring/observability service, no real payment processor, no production
+API gateway - just the core idea behind each concept, implemented from
+scratch in well under 100 lines per file.
+
+---
+
 ## 🎓 Teaching Notes
 
 This project intentionally favors **readability over performance**:
@@ -316,7 +352,10 @@ This project intentionally favors **readability over performance**:
 
 ✔ Streamlit &nbsp; ✔ LangGraph &nbsp; ✔ StateGraph &nbsp; ✔ Multi-Agent Systems
 ✔ Tool Calling &nbsp; ✔ RAG &nbsp; ✔ FAISS &nbsp; ✔ Pandas &nbsp; ✔ Plotly
-✔ LLM Integration (Google Gemini) &nbsp; ✔ Docker
+✔ LLM Integration (Google Gemini + Groq fallback) &nbsp; ✔ Docker
+✔ Model Serving &nbsp; ✔ API Development (FastAPI) &nbsp; ✔ Token Management
+✔ LLM Response Caching &nbsp; ✔ Monitoring &nbsp; ✔ Evaluation (incl. LLM-as-judge)
+✔ Guardrails &nbsp; ✔ Cost Optimization
 
 ---
 
@@ -338,7 +377,8 @@ _(Add your own screenshots here after running the app — placeholders below.)_
 Python 3.12 · Streamlit · LangGraph · LangChain · Google Gemini
 (`gemini-2.5-flash` by default, configurable) · Groq (optional fallback,
 `llama-3.1-8b-instant`) · Sentence-Transformers (local embeddings,
-`all-MiniLM-L6-v2`) · Pandas · Matplotlib · Plotly · FAISS · Docker · python-dotenv
+`all-MiniLM-L6-v2`) · Pandas · Matplotlib · Plotly · FAISS · FastAPI + uvicorn
+(LLMOps demo API only) · Docker · python-dotenv
 
 ## ⚠️ Notes on Cost & API Limits
 
